@@ -17,21 +17,19 @@ exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({ error: "Method not allowed" }),
     };
   }
 
   try {
     const requestData = JSON.parse(event.body);
-    const { type } = requestData; // 'article' or 'contact'
+    const { type } = requestData;
 
     // Gmail configuration
     const GMAIL_USER = process.env.GMAIL_USER || "your-email@gmail.com";
     const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || "your-16-char-app-password";
-    const TO_EMAIL = process.env.TO_EMAIL || "your-receiving-email@gmail.com";
+    const TO_EMAIL = process.env.TO_EMAIL || "admin@bytetobeacon.com";
 
     // Create Gmail transporter
     const transporter = nodemailer.createTransporter({
@@ -45,7 +43,6 @@ exports.handler = async (event) => {
     let mailOptions;
 
     if (type === 'article') {
-      // Handle article submission
       const { authorName, authorEmail, articleTitle, articleContent, attachment } = requestData;
 
       if (!authorName || !authorEmail || !articleTitle || !articleContent) {
@@ -57,12 +54,12 @@ exports.handler = async (event) => {
       }
 
       mailOptions = {
-        from: `"ByteToBeacon Submissions" <${GMAIL_USER}>`,
+        from: `"ByteToBeacon Article Submissions" <${GMAIL_USER}>`,
         to: TO_EMAIL,
         replyTo: authorEmail,
-        subject: `[ByteToBeacon] New Article: ${articleTitle}`,
+        subject: `[ByteToBeacon] New Article Submission: ${articleTitle}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <div style="background: #00ab6c; color: white; padding: 20px; text-align: center;">
               <h1 style="margin: 0; font-size: 24px;">📝 ByteToBeacon</h1>
               <p style="margin: 5px 0 0 0; opacity: 0.9;">New Article Submission</p>
@@ -70,7 +67,7 @@ exports.handler = async (event) => {
 
             <div style="padding: 30px;">
               <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #00ab6c;">
-                <h2 style="margin-top: 0; color: #333;">${articleTitle}</h2>
+                <h2 style="margin-top: 0; color: #333; font-size: 20px;">${articleTitle}</h2>
                 <p style="margin: 10px 0 5px 0; color: #666;"><strong>👤 Author:</strong> ${authorName}</p>
                 <p style="margin: 5px 0; color: #666;"><strong>📧 Email:</strong> <a href="mailto:${authorEmail}" style="color: #00ab6c;">${authorEmail}</a></p>
               </div>
@@ -107,7 +104,6 @@ exports.handler = async (event) => {
       }
 
     } else if (type === 'contact') {
-      // Handle contact form submission
       const { name, email, subject, message } = requestData;
 
       if (!name || !email || !subject || !message) {
@@ -124,7 +120,7 @@ exports.handler = async (event) => {
         replyTo: email,
         subject: `[ByteToBeacon Contact] ${subject}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
             <div style="background: #00ab6c; color: white; padding: 20px; text-align: center;">
               <h1 style="margin: 0; font-size: 24px;">📧 ByteToBeacon</h1>
               <p style="margin: 5px 0 0 0; opacity: 0.9;">Contact Form Message</p>
@@ -132,7 +128,7 @@ exports.handler = async (event) => {
 
             <div style="padding: 30px;">
               <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #00ab6c;">
-                <h2 style="margin-top: 0; color: #333;">${subject}</h2>
+                <h2 style="margin-top: 0; color: #333; font-size: 20px;">${subject}</h2>
                 <p style="margin: 10px 0 5px 0; color: #666;"><strong>👤 Name:</strong> ${name}</p>
                 <p style="margin: 5px 0; color: #666;"><strong>📧 Email:</strong> <a href="mailto:${email}" style="color: #00ab6c;">${email}</a></p>
               </div>
@@ -161,7 +157,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // Send email
     await transporter.sendMail(mailOptions);
 
     return {
@@ -170,8 +165,8 @@ exports.handler = async (event) => {
       body: JSON.stringify({ 
         success: true, 
         message: type === 'article' 
-          ? "✅ Article sent successfully! We'll review your submission." 
-          : "✅ Message sent successfully! We'll get back to you soon."
+          ? "✅ Article submitted successfully! We'll review your submission and get back to you soon." 
+          : "✅ Message sent successfully! We'll respond within 24-48 hours."
       }),
     };
 
@@ -180,9 +175,9 @@ exports.handler = async (event) => {
 
     let errorMessage = "Failed to send email";
     if (error.code === "EAUTH") {
-      errorMessage = "❌ Gmail authentication failed. Please check email settings.";
+      errorMessage = "❌ Gmail authentication failed. Please check your email configuration.";
     } else if (error.code === "ECONNECTION") {
-      errorMessage = "❌ Connection failed. Please try again.";
+      errorMessage = "❌ Connection failed. Please try again later.";
     }
 
     return {

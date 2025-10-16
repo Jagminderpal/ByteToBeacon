@@ -1162,6 +1162,7 @@ textarea.form-control {
   align-items: center;
   gap: var(--space-24);
   position: relative;
+  flex-wrap: wrap;
 }
 
 .logo-section {
@@ -1190,6 +1191,80 @@ textarea.form-control {
   color: var(--color-text-secondary);
   margin: var(--space-4) 0 0 0;
   font-style: italic;
+}
+
+/* Search Section */
+.search-section {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 var(--space-24);
+}
+
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--space-12) var(--space-48) var(--space-12) var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.search-input:focus {
+  outline: var(--focus-outline);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.search-btn {
+  position: absolute;
+  right: var(--space-12);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-standard);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-secondary);
+}
+
+.search-clear {
+  position: absolute;
+  right: var(--space-12);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-standard);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear:hover {
+  color: var(--color-error);
+  background-color: rgba(var(--color-error-rgb), 0.1);
 }
 
 /* Navigation */
@@ -1269,10 +1344,106 @@ textarea.form-control {
   display: none;
 }
 
+/* Articles Section */
+.articles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-32);
+  flex-wrap: wrap;
+  gap: var(--space-16);
+}
+
 .section-title {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.articles-count {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Category Filters */
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin-bottom: var(--space-32);
+  justify-content: center;
+}
+
+.category-filter {
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+  text-decoration: none;
+}
+
+.category-filter:hover {
+  background-color: var(--color-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.category-filter.active {
+  background-color: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  border-color: var(--color-primary);
+}
+
+/* Search Results Info */
+.search-results-info {
+  background-color: var(--color-bg-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: var(--space-16);
   margin-bottom: var(--space-32);
   text-align: center;
+}
+
+.search-results-info h3 {
+  margin: 0 0 var(--space-8) 0;
   color: var(--color-text);
+  font-size: var(--font-size-lg);
+}
+
+.search-results-info p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.search-highlight {
+  background-color: rgba(var(--color-primary-green-rgb), 0.3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: var(--space-64) var(--space-20);
+}
+
+.no-results-content h3 {
+  color: var(--color-text);
+  margin-bottom: var(--space-16);
+  font-size: var(--font-size-2xl);
+}
+
+.no-results-content p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-24);
+  font-size: var(--font-size-lg);
 }
 
 /* Articles Grid */
@@ -1322,6 +1493,51 @@ textarea.form-control {
   font-weight: var(--font-weight-medium);
 }
 
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  margin-bottom: var(--space-16);
+  align-items: center;
+}
+
+.article-category {
+  background-color: var(--color-primary);
+  color: var(--color-btn-primary-text);
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.article-read-time {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-bottom: var(--space-12);
+}
+
+.article-tag {
+  background-color: var(--color-secondary);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  text-decoration: none;
+}
+
+.article-tag:hover {
+  background-color: var(--color-secondary-hover);
+  color: var(--color-text);
+}
+
 .article-preview {
   font-size: var(--font-size-md);
   line-height: var(--line-height-normal);
@@ -1329,7 +1545,7 @@ textarea.form-control {
   margin-bottom: var(--space-24);
   overflow: hidden;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
@@ -1739,7 +1955,7 @@ textarea.form-control {
   }
   
   .header-content {
-    align-items: flex-start;
+    align-items: stretch;
   }
   
   .logo-section {
@@ -1747,14 +1963,33 @@ textarea.form-control {
     text-align: left;
   }
   
+  .search-section {
+    order: 2;
+    margin: 0;
+  }
+  
   .main-nav {
-    order: 3;
+    order: 4;
     width: 100%;
   }
   
   #postArticleBtn {
-    order: 2;
+    order: 3;
     align-self: flex-start;
+  }
+  
+  .articles-header {
+    text-align: center;
+  }
+  
+  .category-filters {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: var(--space-8);
+  }
+  
+  .category-filter {
+    white-space: nowrap;
   }
 }
 

@@ -1,24 +1,35 @@
 {
-  "name": "bytetobeacon-multipage",
-  "version": "2.0.0",
-  "description": "ByteToBeacon - Multi-page blog platform with navigation, articles, about, contact, and career pages",
+  "name": "bytetobeacon-with-search",
+  "version": "2.1.0",
+  "description": "ByteToBeacon - Technical blog platform with search functionality, 30 curated articles, and multi-page navigation",
   "private": true,
   "scripts": {
-    "build": "echo 'Static multi-page site - no build required'",
-    "dev": "echo 'Use live server for local development'"
+    "build": "echo 'Static site with search - no build step required'",
+    "dev": "echo 'Use live server or similar for local development'",
+    "lint": "echo 'Add linting configuration as needed'"
   },
   "dependencies": {
     "nodemailer": "^6.9.7"
   },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
   "keywords": [
     "blog",
-    "multi-page",
-    "articles",
+    "technical-articles",
+    "search",
+    "software-development",
+    "ai",
+    "web-development",
+    "testing",
+    "devops",
     "netlify",
-    "static-site",
-    "navigation",
-    "contact-form"
+    "static-site"
   ],
   "author": "ByteToBeacon Team",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/bytetobeacon.git"
+  }
 }

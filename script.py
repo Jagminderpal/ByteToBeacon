@@ -1,525 +1,218 @@
-import os
+import json, random, re
+from datetime import datetime, timedelta
 
-# Create updated Netlify functions for both article and contact form submissions
-os.makedirs("netlify/functions", exist_ok=True)
+# Set seed for reproducible content
+random.seed(42)
 
-# Updated function to handle both article and contact submissions
-email_handler_function = '''const nodemailer = require("nodemailer");
-
-exports.handler = async (event) => {
-  // Handle CORS preflight
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: "OK",
-    };
-  }
-
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
-  }
-
-  try {
-    const requestData = JSON.parse(event.body);
-    const { type } = requestData; // 'article' or 'contact'
-
-    // Gmail configuration
-    const GMAIL_USER = process.env.GMAIL_USER || "your-email@gmail.com";
-    const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || "your-16-char-app-password";
-    const TO_EMAIL = process.env.TO_EMAIL || "your-receiving-email@gmail.com";
-
-    // Create Gmail transporter
-    const transporter = nodemailer.createTransporter({
-      service: 'gmail',
-      auth: {
-        user: GMAIL_USER,
-        pass: GMAIL_APP_PASSWORD,
-      },
-    });
-
-    let mailOptions;
-
-    if (type === 'article') {
-      // Handle article submission
-      const { authorName, authorEmail, articleTitle, articleContent, attachment } = requestData;
-
-      if (!authorName || !authorEmail || !articleTitle || !articleContent) {
-        return {
-          statusCode: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-          body: JSON.stringify({ error: "Missing required fields" }),
-        };
-      }
-
-      mailOptions = {
-        from: `"ByteToBeacon Submissions" <${GMAIL_USER}>`,
-        to: TO_EMAIL,
-        replyTo: authorEmail,
-        subject: `[ByteToBeacon] New Article: ${articleTitle}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #00ab6c; color: white; padding: 20px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px;">📝 ByteToBeacon</h1>
-              <p style="margin: 5px 0 0 0; opacity: 0.9;">New Article Submission</p>
-            </div>
-            
-            <div style="padding: 30px;">
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #00ab6c;">
-                <h2 style="margin-top: 0; color: #333;">${articleTitle}</h2>
-                <p style="margin: 10px 0 5px 0; color: #666;"><strong>👤 Author:</strong> ${authorName}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>📧 Email:</strong> <a href="mailto:${authorEmail}" style="color: #00ab6c;">${authorEmail}</a></p>
-              </div>
-              
-              <div style="margin: 20px 0;">
-                <h3 style="color: #333; border-bottom: 2px solid #00ab6c; padding-bottom: 10px;">📖 Article Content</h3>
-                <div style="background: #ffffff; border: 2px solid #e9ecef; padding: 20px; border-radius: 8px; white-space: pre-wrap; line-height: 1.6; color: #333;">${articleContent}</div>
-              </div>
-              
-              ${attachment ? `
-              <div style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; color: #0066cc;"><strong>📎 PDF Attachment:</strong> ${attachment.filename}</p>
-              </div>
-              ` : ''}
-              
-              <div style="background: #f1f1f1; padding: 15px; border-radius: 8px; margin-top: 30px; text-align: center;">
-                <p style="margin: 0; color: #666; font-size: 14px;">
-                  💡 <em>Reply to respond directly to ${authorName}</em><br>
-                  🚀 <em>Powered by ByteToBeacon</em>
-                </p>
-              </div>
-            </div>
-          </div>
-        `,
-        attachments: [],
-      };
-
-      if (attachment && attachment.base64 && attachment.filename) {
-        mailOptions.attachments.push({
-          filename: attachment.filename,
-          content: Buffer.from(attachment.base64, "base64"),
-          contentType: "application/pdf",
-        });
-      }
-
-    } else if (type === 'contact') {
-      // Handle contact form submission
-      const { name, email, subject, message } = requestData;
-
-      if (!name || !email || !subject || !message) {
-        return {
-          statusCode: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-          body: JSON.stringify({ error: "Missing required fields" }),
-        };
-      }
-
-      mailOptions = {
-        from: `"ByteToBeacon Contact" <${GMAIL_USER}>`,
-        to: TO_EMAIL,
-        replyTo: email,
-        subject: `[ByteToBeacon Contact] ${subject}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: #00ab6c; color: white; padding: 20px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px;">📧 ByteToBeacon</h1>
-              <p style="margin: 5px 0 0 0; opacity: 0.9;">Contact Form Message</p>
-            </div>
-            
-            <div style="padding: 30px;">
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #00ab6c;">
-                <h2 style="margin-top: 0; color: #333;">${subject}</h2>
-                <p style="margin: 10px 0 5px 0; color: #666;"><strong>👤 Name:</strong> ${name}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>📧 Email:</strong> <a href="mailto:${email}" style="color: #00ab6c;">${email}</a></p>
-              </div>
-              
-              <div style="margin: 20px 0;">
-                <h3 style="color: #333; border-bottom: 2px solid #00ab6c; padding-bottom: 10px;">💬 Message</h3>
-                <div style="background: #ffffff; border: 2px solid #e9ecef; padding: 20px; border-radius: 8px; white-space: pre-wrap; line-height: 1.6; color: #333;">${message}</div>
-              </div>
-              
-              <div style="background: #f1f1f1; padding: 15px; border-radius: 8px; margin-top: 30px; text-align: center;">
-                <p style="margin: 0; color: #666; font-size: 14px;">
-                  💡 <em>Reply to respond directly to ${name}</em><br>
-                  🚀 <em>Powered by ByteToBeacon</em>
-                </p>
-              </div>
-            </div>
-          </div>
-        `,
-      };
-
-    } else {
-      return {
-        statusCode: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({ error: "Invalid submission type" }),
-      };
-    }
-
-    // Send email
-    await transporter.sendMail(mailOptions);
-
-    return {
-      statusCode: 200,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ 
-        success: true, 
-        message: type === 'article' 
-          ? "✅ Article sent successfully! We'll review your submission." 
-          : "✅ Message sent successfully! We'll get back to you soon."
-      }),
-    };
-
-  } catch (error) {
-    console.error("Email sending error:", error);
+# 30 trending technical topics across different domains
+topics = [
+    # GenAI & LLMs (8 articles)
+    "Building Production-Ready RAG Systems with Vector Databases",
+    "Fine-Tuning Large Language Models with LoRA and QLoRA", 
+    "Prompt Engineering Best Practices for Enterprise Applications",
+    "Implementing AI Guardrails and Content Safety Filters",
+    "Vector Embeddings and Semantic Search Implementation",
+    "AI Agent Architectures: Planning and Tool Integration",
+    "Cost Optimization Strategies for LLM Inference",
+    "Multimodal AI: Combining Text, Images, and Audio Processing",
     
-    let errorMessage = "Failed to send email";
-    if (error.code === "EAUTH") {
-      errorMessage = "❌ Gmail authentication failed. Please check email settings.";
-    } else if (error.code === "ECONNECTION") {
-      errorMessage = "❌ Connection failed. Please try again.";
-    }
+    # Web Development (8 articles)
+    "Next.js 15 App Router and Server Components Deep Dive",
+    "Building Scalable React Applications with Suspense",
+    "Modern CSS: Container Queries and CSS Grid Mastery", 
+    "TypeScript 5.x Advanced Features and Performance",
+    "Web Performance Optimization: Core Web Vitals 2025",
+    "Progressive Web Apps: Offline-First Architecture",
+    "WebAssembly Integration in Modern Web Applications",
+    "Micro-Frontends: Architecture Patterns and Pitfalls",
     
-    return {
-      statusCode: 500,
-      headers: { "Access-Control-Allow-Origin": "*" },
-      body: JSON.stringify({ error: errorMessage }),
-    };
-  }
-};'''
-
-# Create updated package.json for the multi-page site
-updated_package_json = '''{
-  "name": "bytetobeacon-multipage",
-  "version": "2.0.0",
-  "description": "ByteToBeacon - Multi-page blog platform with navigation, articles, about, contact, and career pages",
-  "private": true,
-  "scripts": {
-    "build": "echo 'Static multi-page site - no build required'",
-    "dev": "echo 'Use live server for local development'"
-  },
-  "dependencies": {
-    "nodemailer": "^6.9.7"
-  },
-  "keywords": [
-    "blog",
-    "multi-page",
-    "articles",
-    "netlify",
-    "static-site",
-    "navigation",
-    "contact-form"
-  ],
-  "author": "ByteToBeacon Team",
-  "license": "MIT"
-}'''
-
-# Create updated netlify.toml
-updated_netlify_toml = '''[build]
-  publish = "."
-  
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-# Redirect rules for client-side routing
-[[redirects]]
-  from = "/about"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/contact" 
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/career"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/article/*"
-  to = "/index.html"
-  status = 200
-
-# Headers for security and caching
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-[[headers]]
-  for = "*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-
-[[headers]]
-  for = "*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000"
-
-[[headers]]
-  for = "*.html"
-  [headers.values]
-    Cache-Control = "public, max-age=3600"'''
-
-# Create comprehensive README for the multi-page site
-multipage_readme = '''# ByteToBeacon - Multi-Page Blog Platform
-
-A comprehensive Medium-style blog platform with full navigation, multiple pages, and enhanced functionality.
-
-## 🌟 Features
-
-### Navigation & Pages
-- 📱 **Responsive Navigation Bar** with hamburger menu for mobile
-- 🏠 **Home Page** - Article grid with clickable titles and shareable URLs
-- ℹ️ **About Page** - Website information and code of conduct
-- 📞 **Contact Page** - Contact form with email functionality
-- 💼 **Career Page** - Job opportunities (currently no openings)
-
-### Article Features
-- 🔗 **Shareable Article URLs** - Each article has a unique, shareable link
-- 📄 **Save as PDF** - Export any article as PDF
-- 📝 **Article Submission** - Submit new articles via modal form
-- 👤 **Author Information** - Display author names and contact details
-
-### Enhanced Functionality
-- 📧 **Dual Email System** - Handles both article submissions and contact messages
-- 🎨 **Professional Design** - Consistent ByteToBeacon branding throughout
-- 📱 **Mobile Responsive** - Works perfectly on all devices
-- 🔍 **SEO Friendly** - Proper page titles and meta descriptions
-
-## 🚀 Quick Deploy Guide
-
-### 1. Upload to GitHub
-Create a new repository and upload all files:
-```
-bytetobeacon-multipage/
-├── index.html              (Main application)
-├── styles.css              (Global styles) 
-├── script.js               (JavaScript functionality)
-├── package.json            (Dependencies)
-├── netlify.toml            (Netlify configuration)
-├── README.md               (This file)
-└── netlify/
-    └── functions/
-        └── send-email.js   (Email handler for both forms)
-```
-
-### 2. Connect to Netlify
-- Import repository to Netlify
-- Auto-detects configuration from netlify.toml
-- Includes redirect rules for client-side routing
-
-### 3. Configure Gmail Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `GMAIL_USER` | Your Gmail address | `your-email@gmail.com` |
-| `GMAIL_APP_PASSWORD` | 16-character app password | `abcd efgh ijkl mnop` |
-| `TO_EMAIL` | Where to receive emails | `admin@bytetobeacon.com` |
-
-### 4. Gmail App Password Setup
-1. Enable 2-Factor Authentication on Gmail
-2. Go to Google Account → Security → 2-Step Verification
-3. Click "App passwords" → Mail → Other (ByteToBeacon)
-4. Copy the 16-character password
-
-## 📄 Page Structure
-
-### Home Page (/)
-- **Navigation bar** with all menu items
-- **Article grid** showing title, author, excerpt
-- **Clickable article titles** that create shareable URLs
-- **"Post an Article"** button opens submission modal
-- **"Save as PDF"** button for each article
-
-### About Page (/about)
-- **Mission statement** and website purpose
-- **Vision and values** of ByteToBeacon
-- **Code of conduct** with community guidelines
-- **Professional layout** with consistent branding
-
-### Contact Page (/contact)
-- **Contact form** with Name, Email, Subject, Message fields
-- **Email integration** sends messages to site admin
-- **Contact information** and response time expectations
-- **Professional styling** matching site theme
-
-### Career Page (/career)
-- **Current status** - No open positions message
-- **Future opportunities** information
-- **Contact invitation** for interested candidates
-- **Professional layout** ready for future job listings
-
-### Article Detail View (/article/[id])
-- **Full article content** with proper formatting
-- **Author information** and publication date
-- **Shareable URL** structure for direct linking
-- **"Save as PDF"** functionality
-- **Back to home** navigation
-
-## 🔧 Technical Features
-
-### Client-Side Routing
-- Handles URLs like `/about`, `/contact`, `/career`, `/article/1`
-- Proper browser history management
-- SEO-friendly URL structure
-- No page reloads when navigating
-
-### Email Functionality
-- **Dual handler** for article submissions and contact messages
-- **Beautiful HTML emails** with ByteToBeacon branding
-- **PDF attachment support** for article submissions
-- **Reply-to functionality** for direct communication
-
-### Responsive Design
-- **Mobile-first approach** with breakpoints
-- **Hamburger menu** for mobile navigation
-- **Flexible grid layouts** that adapt to screen size
-- **Touch-friendly** buttons and interactions
-
-## 🎨 Customization
-
-### Adding New Articles
-Edit the `articles` array in the JavaScript:
-```javascript
-{
-  id: 5,
-  title: "Your New Article",
-  author: "Author Name",
-  date: "2025-10-15",
-  slug: "your-new-article",
-  excerpt: "Brief description...",
-  content: "Full article content..."
-}
-```
-
-### Styling Changes
-- Edit CSS custom properties in `:root` for color scheme
-- Modify component styles in the CSS file
-- All colors use the `--primary-color` variable for consistency
-
-### Navigation Menu
-Update the navigation array to add/remove menu items:
-```javascript
-const navigation = [
-  { name: "Home", url: "/" },
-  { name: "About", url: "/about" },
-  // Add new pages here
-];
-```
-
-## 📧 Email Templates
-
-### Article Submission Email
-- **Professional header** with ByteToBeacon branding
-- **Author information** section with contact details
-- **Full article content** in readable format
-- **PDF attachment** handling (if provided)
-- **Reply-to** set to article author
-
-### Contact Form Email
-- **Clean header** with contact form identification
-- **Sender details** with name and email
-- **Subject line** preservation
-- **Message content** with proper formatting
-- **Direct reply** functionality
-
-## 🔍 SEO & Performance
-
-### SEO Features
-- **Dynamic page titles** for each route
-- **Meta descriptions** for better search visibility
-- **Semantic HTML** structure throughout
-- **Clean URL structure** for article sharing
-
-### Performance Optimizations
-- **Minimal JavaScript** for fast loading
-- **CSS Grid/Flexbox** for efficient layouts
-- **Optimized images** and assets
-- **Client-side routing** for smooth navigation
-
-## 🛠️ Development
-
-### Local Development
-1. Use any static file server (Live Server in VS Code)
-2. Email functionality only works when deployed to Netlify
-3. Test routing by manually changing URLs
-
-### Adding New Pages
-1. Add route to navigation array
-2. Create page template in JavaScript
-3. Add redirect rule to netlify.toml
-4. Update router function
-
-## 📞 Support
-
-**Common Issues:**
-- **Email not sending:** Check Gmail app password and environment variables
-- **Navigation not working:** Verify netlify.toml redirect rules
-- **Articles not displaying:** Check JavaScript console for errors
-
-**Environment Variables Required:**
-- `GMAIL_USER`: Your Gmail address
-- `GMAIL_APP_PASSWORD`: Gmail app password (16 characters)
-- `TO_EMAIL`: Recipient email for all submissions
-
----
-
-Built with ❤️ for the ByteToBeacon community | Multi-page architecture ready for scaling
-'''
-
-# Write all the updated files
-files_to_create = [
-    ("netlify/functions/send-email.js", email_handler_function),
-    ("package.json", updated_package_json),
-    ("netlify.toml", updated_netlify_toml),
-    ("README.md", multipage_readme)
+    # Testing (6 articles)
+    "Test-Driven Development in Modern JavaScript Frameworks",
+    "End-to-End Testing with Playwright and Cypress",
+    "API Testing Strategies: Contract Testing with Pact",
+    "Performance Testing with K6 and Load Impact", 
+    "Visual Regression Testing for Frontend Applications",
+    "Mutation Testing: Improving Test Suite Quality",
+    
+    # DevOps & Infrastructure (5 articles)
+    "Kubernetes Security: Pod Security Standards Implementation",
+    "CI/CD Pipeline Optimization with GitHub Actions",
+    "Infrastructure as Code: Terraform vs Pulumi Comparison",
+    "Monitoring and Observability with OpenTelemetry",
+    "Serverless Functions: Cold Start Optimization",
+    
+    # Security & Backend (3 articles)
+    "Zero Trust Architecture Implementation Guide",
+    "API Security: OWASP Top 10 Prevention Strategies", 
+    "Microservices Architecture: Event-Driven Design Patterns"
 ]
 
-for filename, content in files_to_create:
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(content)
+# Author pool with expertise areas
+authors = [
+    "Sarah Chen", "Alex Thompson", "Mike Rodriguez", "Priya Nair", "Liam O'Connor",
+    "Zoe Park", "Amir Haddad", "Nina Petrov", "Diego Alvarez", "Hannah Müller",
+    "Tomasz Kowalski", "Aisha Khan", "Kenji Sato", "Elena Garcia", "Jonas Weber"
+]
 
-print("✅ Multi-page ByteToBeacon site ready!")
-print("\n🌟 New Features Added:")
-print("  📱 Responsive navigation bar with hamburger menu")
-print("  🏠 Home page with shareable article URLs")
-print("  ℹ️ About page with mission and code of conduct")
-print("  📞 Contact page with email form")
-print("  💼 Career page (no current openings)")
-print("  🔗 Clickable article titles with shareable links")
-print("  📧 Dual email system for articles and contact")
-print("\n🎯 Enhanced Functionality:")
-print("  ✅ Client-side routing (/about, /contact, /career, /article/1)")
-print("  ✅ Shareable article URLs")
-print("  ✅ Mobile-responsive design")
-print("  ✅ Professional navigation")
-print("  ✅ SEO-friendly structure")
-print("  ✅ Gmail integration for all forms")
-print("\n📁 Directory Structure:")
-print("  / (from web app + enhanced files)")
-print("  ├── index.html")
-print("  ├── styles.css") 
-print("  ├── script.js")
-print("  ├── package.json")
-print("  ├── netlify.toml")
-print("  ├── README.md")
-print("  └── netlify/functions/send-email.js")
-print("\n🚀 Ready to deploy with full navigation and shareable articles!")
+def slugify(title):
+    """Convert title to URL-friendly slug"""
+    s = title.lower()
+    s = re.sub(r"[^a-z0-9\s-]", "", s)
+    s = re.sub(r"\s+", "-", s)
+    s = re.sub(r"-+", "-", s)
+    return s.strip('-')
+
+def determine_category(title):
+    """Determine article category based on title keywords"""
+    title_lower = title.lower()
+    
+    if any(word in title_lower for word in ['ai', 'llm', 'rag', 'prompt', 'vector', 'embeddings', 'agent', 'multimodal']):
+        return "AI & Machine Learning"
+    elif any(word in title_lower for word in ['web', 'react', 'css', 'next.js', 'typescript', 'pwa', 'webassembly', 'micro-frontend']):
+        return "Web Development"
+    elif any(word in title_lower for word in ['test', 'testing', 'tdd', 'playwright', 'cypress', 'pact', 'k6', 'mutation']):
+        return "Testing"
+    elif any(word in title_lower for word in ['kubernetes', 'ci/cd', 'terraform', 'pulumi', 'observability', 'serverless']):
+        return "DevOps"
+    elif any(word in title_lower for word in ['security', 'zero trust', 'api security', 'owasp']):
+        return "Security"
+    else:
+        return "Software Architecture"
+
+def generate_tags(title):
+    """Generate relevant tags based on title"""
+    title_lower = title.lower()
+    all_tags = []
+    
+    # Technology-specific tags
+    if 'react' in title_lower: all_tags.extend(['react', 'frontend'])
+    if 'next.js' in title_lower: all_tags.extend(['nextjs', 'ssr'])
+    if 'typescript' in title_lower: all_tags.extend(['typescript', 'javascript'])
+    if 'kubernetes' in title_lower: all_tags.extend(['kubernetes', 'devops'])
+    if 'ai' in title_lower or 'llm' in title_lower: all_tags.extend(['ai', 'machine-learning'])
+    if 'testing' in title_lower: all_tags.extend(['testing', 'qa'])
+    if 'security' in title_lower: all_tags.extend(['security', 'cybersecurity'])
+    if 'performance' in title_lower: all_tags.extend(['performance', 'optimization'])
+    if 'css' in title_lower: all_tags.extend(['css', 'frontend'])
+    if 'api' in title_lower: all_tags.extend(['api', 'backend'])
+    
+    # Generic fallback
+    if not all_tags:
+        all_tags = ['programming', 'software-development']
+    
+    return list(set(all_tags))[:4]  # Return max 4 unique tags
+
+def generate_technical_content(title):
+    """Generate realistic 200-word technical article content"""
+    
+    # Create topic-specific content based on title keywords
+    title_lower = title.lower()
+    
+    # Introduction paragraph based on topic
+    if 'ai' in title_lower or 'llm' in title_lower or 'rag' in title_lower:
+        intro = f"{title} represents a breakthrough in artificial intelligence applications, enabling organizations to harness the power of large language models for practical business solutions. The rapid evolution of AI technologies has created new opportunities for intelligent automation and enhanced user experiences."
+    elif 'react' in title_lower or 'next.js' in title_lower or 'web' in title_lower:
+        intro = f"Modern web development with {title.lower()} has transformed how we build interactive, performant applications. Understanding these technologies is crucial for delivering exceptional user experiences and maintaining competitive advantages in today's digital landscape."
+    elif 'test' in title_lower or 'testing' in title_lower:
+        intro = f"Quality assurance through {title.lower()} ensures reliable software delivery and reduces production incidents. Comprehensive testing strategies have become essential for maintaining code quality and user satisfaction in complex applications."
+    elif 'kubernetes' in title_lower or 'devops' in title_lower or 'ci/cd' in title_lower:
+        intro = f"Implementing {title.lower()} streamlines development workflows and improves deployment reliability. Modern DevOps practices enable teams to deliver features faster while maintaining system stability and security."
+    elif 'security' in title_lower:
+        intro = f"Security-first approaches to {title.lower()} protect applications against evolving threats and sophisticated attack vectors. Organizations must prioritize robust security measures to safeguard sensitive data and maintain user trust."
+    else:
+        intro = f"{title} has emerged as a critical component in modern software architecture, addressing key challenges in scalability, maintainability, and system reliability."
+    
+    # Main technical content
+    main_content = """The implementation requires careful consideration of architecture patterns, performance optimization, and scalability requirements. Key decisions involve selecting appropriate frameworks, designing efficient algorithms, and establishing robust error handling mechanisms.
+
+Production deployment demands comprehensive testing methodologies, including unit tests, integration scenarios, and end-to-end validation. Monitoring infrastructure provides essential insights through structured logging, distributed tracing, and real-time performance metrics.
+
+Best practices emphasize following established coding standards, maintaining thorough documentation, and implementing automated CI/CD pipelines. Regular code reviews and collaborative development processes ensure knowledge sharing while maintaining high-quality deliverables."""
+    
+    # Conclusion
+    conclusion = "Successful adoption requires incremental implementation, continuous evaluation, and iterative refinement based on production feedback and evolving business requirements."
+    
+    # Combine all parts
+    full_content = f"{intro}\n\n{main_content}\n\n{conclusion}"
+    
+    # Ensure approximately 200 words (180-220 range)
+    words = full_content.split()
+    if len(words) > 220:
+        # Trim to 200 words
+        full_content = ' '.join(words[:200])
+    elif len(words) < 180:
+        # Add more content to reach ~200 words
+        additional = " Modern tooling and community resources provide extensive support for implementation, with comprehensive documentation and active developer communities contributing to ongoing improvements and innovation."
+        full_content += additional
+    
+    return full_content
+
+# Generate 30 articles
+articles = []
+start_date = datetime(2025, 10, 16)
+
+for idx, title in enumerate(topics, start=1):
+    author = random.choice(authors)
+    # Distribute dates over the past 30 days
+    date = (start_date - timedelta(days=random.randint(0, 30))).strftime('%Y-%m-%d')
+    content = generate_technical_content(title)
+    
+    # Create excerpt from first 30 words
+    words = content.split()
+    excerpt = ' '.join(words[:30]) + ('...' if len(words) > 30 else '')
+    
+    articles.append({
+        "id": idx,
+        "title": title,
+        "author": author,
+        "date": date,
+        "slug": slugify(title),
+        "excerpt": excerpt,
+        "content": content,
+        "category": determine_category(title),
+        "readTime": "3 min read",
+        "tags": generate_tags(title)
+    })
+
+# Create data directory and save articles
+import os
+os.makedirs('data', exist_ok=True)
+
+articles_data = {
+    "meta": {
+        "total": len(articles),
+        "generated": datetime.now().isoformat(),
+        "version": "1.0.0",
+        "description": "ByteToBeacon technical articles covering software development, AI, web development, testing, and DevOps"
+    },
+    "articles": articles
+}
+
+with open('data/articles.json', 'w', encoding='utf-8') as f:
+    json.dump(articles_data, f, ensure_ascii=False, indent=2)
+
+print(f"✅ Generated {len(articles)} technical articles")
+print(f"📊 Categories: {len(set(article['category'] for article in articles))} unique categories") 
+print(f"📝 Average word count: {sum(len(article['content'].split()) for article in articles) // len(articles)} words")
+print("📄 Saved to data/articles.json")
+
+# Show stats by category
+category_stats = {}
+for article in articles:
+    cat = article['category']
+    category_stats[cat] = category_stats.get(cat, 0) + 1
+
+print(f"\n📊 Articles by Category:")
+for category, count in sorted(category_stats.items()):
+    print(f"  {category}: {count} articles")
+
+# Show sample article details
+sample = articles[0]
+print(f"\n📖 Sample Article:")
+print(f"Title: {sample['title']}")
+print(f"Author: {sample['author']}")
+print(f"Category: {sample['category']}")
+print(f"Tags: {', '.join(sample['tags'])}")
+print(f"Word count: {len(sample['content'].split())} words")
+print(f"Excerpt: {sample['excerpt']}")
+print(f"Content preview: {sample['content'][:100]}...")
