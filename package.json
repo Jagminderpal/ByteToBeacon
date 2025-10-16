@@ -1,19 +1,7 @@
 {
-  "name": "bytetobeacon-with-search",
-  "version": "2.1.0",
-  "description": "ByteToBeacon - Technical blog platform with search functionality, 30 curated articles, and multi-page navigation",
-  "private": true,
-  "scripts": {
-    "build": "echo 'Static site with search - no build step required'",
-    "dev": "echo 'Use live server or similar for local development'",
-    "lint": "echo 'Add linting configuration as needed'"
-  },
-  "dependencies": {
-    "nodemailer": "^6.9.7"
-  },
-  "devDependencies": {
-    "live-server": "^1.2.2"
-  },
+  "name": "bytetobeacon-complete",
+  "version": "1.0.0",
+  "description": "ByteToBeacon - Complete technical blog platform with search functionality, 30 curated articles, and multi-page navigation",
   "keywords": [
     "blog",
     "technical-articles",
@@ -28,8 +16,29 @@
   ],
   "author": "ByteToBeacon Team",
   "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static site - no build step required'",
+    "dev": "live-server --port=3000",
+    "start": "npm run dev",
+    "lint": "echo 'Add linting configuration as needed'",
+    "test": "echo 'Add testing configuration as needed'"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/your-username/bytetobeacon.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/bytetobeacon/issues"
+  },
+  "homepage": "https://bytetobeacon.netlify.app"
 }

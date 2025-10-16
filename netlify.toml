@@ -31,7 +31,7 @@
   to = "/index.html"
   status = 200
 
-# API routes
+# API routes for functions
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
@@ -68,3 +68,13 @@
   [headers.values]
     Cache-Control = "public, max-age=1800"
     Access-Control-Allow-Origin = "*"
+
+# Environment-specific configurations
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "development"

@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     const requestData = JSON.parse(event.body);
     const { type } = requestData;
 
-    // Gmail configuration
+    // Gmail configuration - set these in Netlify environment variables
     const GMAIL_USER = process.env.GMAIL_USER || "your-email@gmail.com";
     const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || "your-16-char-app-password";
     const TO_EMAIL = process.env.TO_EMAIL || "admin@bytetobeacon.com";
