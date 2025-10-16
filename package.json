@@ -1,0 +1,24 @@
+{
+  "name": "bytetobeacon-multipage",
+  "version": "2.0.0",
+  "description": "ByteToBeacon - Multi-page blog platform with navigation, articles, about, contact, and career pages",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Static multi-page site - no build required'",
+    "dev": "echo 'Use live server for local development'"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.7"
+  },
+  "keywords": [
+    "blog",
+    "multi-page",
+    "articles",
+    "netlify",
+    "static-site",
+    "navigation",
+    "contact-form"
+  ],
+  "author": "ByteToBeacon Team",
+  "license": "MIT"
+}

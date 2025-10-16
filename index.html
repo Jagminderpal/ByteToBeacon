@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteToBeacon - Bridging Technology and Innovation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1 class="site-title"><a href="/" id="homeLink">ByteToBeacon</a></h1>
+                    <p class="site-tagline">Bridging Technology and Innovation</p>
+                </div>
+                <nav class="main-nav">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <ul class="nav-menu" id="navMenu">
+                        <li><a href="/" class="nav-link active" data-page="home">Home</a></li>
+                        <li><a href="/about" class="nav-link" data-page="about">About</a></li>
+                        <li><a href="/contact" class="nav-link" data-page="contact">Contact</a></li>
+                        <li><a href="/career" class="nav-link" data-page="career">Career</a></li>
+                    </ul>
+                </nav>
+                <button class="btn btn--primary" id="postArticleBtn">
+                    Post an Article
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Page -->
+        <div class="page-container" id="homePage">
+            <div class="container">
+                <section class="articles-section">
+                    <h2 class="section-title">Latest Articles</h2>
+                    <div class="articles-grid" id="articlesGrid">
+                        <!-- Articles will be populated by JavaScript -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- About Page -->
+        <div class="page-container hidden" id="aboutPage">
+            <div class="container">
+                <section class="about-section">
+                    <h2 class="section-title">About ByteToBeacon</h2>
+                    <div class="about-content">
+                        <div class="about-mission">
+                            <h3>Our Mission</h3>
+                            <p>ByteToBeacon serves as a bridge between the technical world of bytes and the guiding light of knowledge beacons. We're dedicated to creating a platform where technology enthusiasts, developers, and innovators can share insights, learn from each other, and collectively push the boundaries of what's possible in the digital world.</p>
+                        </div>
+                        
+                        <div class="about-vision">
+                            <h3>Our Vision</h3>
+                            <p>To become the premier destination for high-quality technical content, fostering a community where knowledge flows freely and innovation thrives through collaboration and shared learning experiences.</p>
+                        </div>
+
+                        <div class="about-values">
+                            <h3>Our Values</h3>
+                            <ul class="values-list">
+                                <li><strong>Quality:</strong> Every piece of content is carefully curated to ensure accuracy and value</li>
+                                <li><strong>Community:</strong> We believe in the power of collective knowledge and peer learning</li>
+                                <li><strong>Innovation:</strong> Embracing cutting-edge technologies and forward-thinking approaches</li>
+                                <li><strong>Accessibility:</strong> Making complex technical concepts understandable for all skill levels</li>
+                                <li><strong>Integrity:</strong> Maintaining honest, unbiased, and transparent communication</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-of-conduct">
+                            <h3>Code of Conduct</h3>
+                            <div class="conduct-rules">
+                                <div class="rule-item">
+                                    <h4>Respectful Communication</h4>
+                                    <p>Treat all community members with respect, regardless of their experience level, background, or opinions. Personal attacks, harassment, or discriminatory language will not be tolerated.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <h4>Quality Content Standards</h4>
+                                    <p>Submit original, well-researched content that provides value to the community. Plagiarism, spam, or deliberately misleading information is strictly prohibited.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <h4>Constructive Feedback</h4>
+                                    <p>When providing feedback or criticism, focus on the content rather than the person. Offer specific, actionable suggestions for improvement.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <h4>No Self-Promotion Spam</h4>
+                                    <p>While sharing your work is encouraged, excessive self-promotion or spam-like behavior is not allowed. Focus on adding value to discussions.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <h4>Respect Intellectual Property</h4>
+                                    <p>Always credit original sources and respect copyright laws. When sharing code or content from others, ensure proper attribution.</p>
+                                </div>
+                                <div class="rule-item">
+                                    <h4>Stay On Topic</h4>
+                                    <p>Keep discussions relevant to technology, development, and innovation. Off-topic content may be moderated or removed.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Contact Page -->
+        <div class="page-container hidden" id="contactPage">
+            <div class="container">
+                <section class="contact-section">
+                    <h2 class="section-title">Contact Us</h2>
+                    <div class="contact-content">
+                        <div class="contact-intro">
+                            <p>Get in touch with the ByteToBeacon team. We'd love to hear from you!</p>
+                            <p class="response-time">We typically respond within 24-48 hours</p>
+                        </div>
+                        
+                        <form class="contact-form" id="contactForm">
+                            <div class="form-group">
+                                <label class="form-label" for="contactName">Name *</label>
+                                <input type="text" id="contactName" name="contactName" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="contactEmail">Email *</label>
+                                <input type="email" id="contactEmail" name="contactEmail" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="contactSubject">Subject *</label>
+                                <input type="text" id="contactSubject" name="contactSubject" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="contactMessage">Message *</label>
+                                <textarea id="contactMessage" name="contactMessage" class="form-control" rows="6" required></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn--primary" id="contactSubmitBtn">
+                                    Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Career Page -->
+        <div class="page-container hidden" id="careerPage">
+            <div class="container">
+                <section class="career-section">
+                    <h2 class="section-title">Careers</h2>
+                    <div class="career-content">
+                        <div class="career-status">
+                            <h3 class="no-positions">No Open Positions Currently</h3>
+                            <p>While we don't have any open positions at the moment, we're always interested in connecting with talented individuals who share our passion for technology and innovation.</p>
+                        </div>
+                        
+                        <div class="future-opportunities">
+                            <h3>Future Opportunities</h3>
+                            <p>We're a growing platform and may have opportunities in the future for:</p>
+                            <ul class="opportunity-list">
+                                <li>Content creators and technical writers</li>
+                                <li>Software developers and engineers</li>
+                                <li>Community managers and moderators</li>
+                                <li>UX/UI designers</li>
+                                <li>Developer relations specialists</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="career-inquiry">
+                            <h3>Interested in Future Opportunities?</h3>
+                            <p>If you're interested in potential future opportunities, feel free to reach out through our contact form. We'd love to hear from passionate technologists who want to help shape the future of knowledge sharing.</p>
+                            <a href="/contact" class="btn btn--primary contact-link">Get in Touch</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Article Detail View -->
+        <div class="page-container hidden" id="articleDetailPage">
+            <div class="container">
+                <div class="article-detail" id="articleDetailContent">
+                    <!-- Article detail content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Post Article -->
+    <div class="modal-overlay" id="postModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Post an Article</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <form class="modal-body" id="articleForm">
+                <div class="form-group">
+                    <label class="form-label" for="authorName">Author Name *</label>
+                    <input type="text" id="authorName" name="authorName" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="authorEmail">Author Email *</label>
+                    <input type="email" id="authorEmail" name="authorEmail" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="articleTitle">Article Title *</label>
+                    <input type="text" id="articleTitle" name="articleTitle" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="articleContent">Article Content *</label>
+                    <textarea id="articleContent" name="articleContent" class="form-control" rows="8" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="pdfFile">Optional PDF Attachment</label>
+                    <input type="file" id="pdfFile" name="pdfFile" class="form-control" accept=".pdf">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn--outline" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn--primary" id="submitBtn">
+                        Submit Article
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <div class="success-content">
+            <h4>Article Submitted Successfully!</h4>
+            <p>Thank you for your contribution. We'll review your article and get back to you soon.</p>
+            <button class="btn btn--primary" id="closeSuccessBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- Print styles for PDF generation -->
+    <style media="print">
+        body * {
+            visibility: hidden;
+        }
+        .article-print, .article-print * {
+            visibility: visible;
+        }
+        .article-print {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            font-family: 'Times New Roman', serif;
+        }
+        .article-print h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #00ab6c;
+            padding-bottom: 10px;
+        }
+        .article-print .author {
+            font-style: italic;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .article-print .content {
+            line-height: 1.6;
+            font-size: 14px;
+        }
+    </style>
+
+    <script src="app.js"></script>
+</body>
+</html>
